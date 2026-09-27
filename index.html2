@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>System Terminal</title>
+
+<style>
+*{
+    box-sizing:border-box;
+}
+
+html,body{
+    margin:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#000;
+    font-family:"Courier New",monospace;
+}
+
+body{
+    color:#00ff66;
+    padding:22px;
+    text-shadow:0 0 7px #00ff66;
+}
+
+#terminal{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    font-size:clamp(11px,1.55vw,17px);
+    line-height:1.45;
+    white-space:pre-wrap;
+    word-break:break-all;
+}
+
+.line{
+    opacity:0;
+    animation:appear .08s forwards;
+}
+
+@keyframes appear{
+    to{opacity:1;}
+}
+
+.warning{
+    color:#fff;
+    text-shadow:0 0 8px #fff;
+}
+
+.success{
+    color:#00ff66;
+    font-weight:bold;
+}
+
+.big{
+    position:fixed;
+    inset:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    background:#000;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .5s;
+    z-index:5;
+}
+
+.big.show{
+    opacity:1;
+}
+
+.system{
+    font-size:clamp(30px,7vw,90px);
+    font-weight:bold;
+    letter-spacing:5px;
+    text-align:center;
+    animation:pulse 1s infinite alternate;
+}
+
+.thanks{
+    margin-top:25px;
+    font-size:clamp(20px,4vw,48px);
+    letter-spacing:8px;
+}
+
+@keyframes pulse{
+    from{
+        opacity:.65;
+        transform:scale(.98);
+    }
+    to{
+        opacity:1;
+        transform:scale(1.02);
+    }
+}
+
+.scan{
+    position:fixed;
+    left:0;
+    width:100%;
+    height:2px;
+    background:#00ff66;
+    box-shadow:0 0 15px #00ff66;
+    opacity:.25;
+    animation:scan 2.5s linear infinite;
+    z-index:10;
+}
+
+@keyframes scan{
+    from{top:0}
+    to{top:100%}
+}
+</style>
+</head>
+
+<body>
+
+<div class="scan"></div>
+<div id="terminal"></div>
+
+<div class="big" id="finalScreen">
+    <div class="system">SYSTEM UPLOADED</div>
+    <div class="thanks">THANK YOU</div>
+</div>
+
+<script>
+
+const terminal = document.getElementById("terminal");
+const finalScreen = document.getElementById("finalScreen");
+
+const lines = [
+
+"BOOT_SEQUENCE // INITIALIZING SECURE TERMINAL...",
+"ESTABLISHING REMOTE CONNECTION ................. [OK]",
+"SECURITY PROTOCOL INITIALIZED .................. [OK]",
+"SCANNING ACTIVE NETWORK INTERFACES ............. [OK]",
+"LOCATING TARGET SESSION ........................ [FOUND]",
+"SESSION IDENTIFIER: 8F-72-AC-19-44",
+"",
+"ANALYZING CONNECTION PARAMETERS.................",
+"PACKET STREAM DETECTED // ENCRYPTED CHANNEL",
+"AUTHENTICATION LAYER ................. BYPASSED",
+"FIREWALL STATUS ...................... BYPASSED",
+"SECURITY GATEWAY ..................... BYPASSED",
+"",
+"ACCESSING USER DATA DIRECTORY...................",
+"READING SYSTEM FILES............................",
+"INDEXING USER DOCUMENTS.........................",
+"INDEXING MEDIA STORAGE..........................",
+"INDEXING APPLICATION DATA.......................",
+"INDEXING LOCAL DATABASES........................",
+"",
+"USER_FILES / DOCUMENTS / MEDIA / DATABASE / CACHE",
+"DATA_STREAM: 0010110100101101001011010010110101",
+"DATA_STREAM: 1101001011010010110100101101001011010",
+"ENCRYPTED DATA BLOCKS ............... DECRYPTING",
+"ENCRYPTION LAYER .................... REMOVED",
+"",
+"SEARCHING USER INFORMATION......................",
+"ACCOUNT DATA.......................... DETECTED",
+"LOCAL FILES........................... DETECTED",
+"APPLICATION DATA...................... DETECTED",
+"SYSTEM CONFIGURATION.................. DETECTED",
+"PRIVATE STORAGE....................... DETECTED",
+"",
+"EXTRACTING DATA BLOCK 01/08.................... [OK]",
+"EXTRACTING DATA BLOCK 02/08.................... [OK]",
+"EXTRACTING DATA BLOCK 03/08.................... [OK]",
+"EXTRACTING DATA BLOCK 04/08.................... [OK]",
+"EXTRACTING DATA BLOCK 05/08.................... [OK]",
+"EXTRACTING DATA BLOCK 06/08.................... [OK]",
+"EXTRACTING DATA BLOCK 07/08.................... [OK]",
+"EXTRACTING DATA BLOCK 08/08.................... [OK]",
+"",
+"COMPILING USER DATA............................",
+"PACKING SYSTEM INFORMATION.....................",
+"COMPRESSING DATA STREAM........................",
+"CREATING REMOTE PACKAGE........................",
+"",
+"UPLOAD CHANNEL ESTABLISHED...................... [OK]",
+"TRANSFER BUFFER ALLOCATED....................... [OK]",
+"UPLOADING SYSTEM DATA...........................",
+"████████████████████████████████████████████",
+"████████████████████████████████████████████",
+"████████████████████████████████████████████",
+"TRANSFER COMPLETE.............................. [100%]",
+"",
+"FINALIZING REMOTE PACKAGE.......................",
+"VERIFYING DATA INTEGRITY........................ [OK]",
+"VERIFYING SYSTEM PACKAGE........................ [OK]",
+"REMOTE STORAGE STATUS........................... [READY]",
+"",
+"EXECUTING FINAL SYSTEM TRANSFER................",
+"SYSTEM PACKAGE CREATED.......................... [OK]",
+"SYSTEM TRANSFER COMPLETE.........................[OK]"
+];
+
+let index = 0;
+
+function addLine(text){
+
+    const div = document.createElement("div");
+    div.className = "line";
+
+    if(
+        text.includes("BYPASSED") ||
+        text.includes("DECRYPTING") ||
+        text.includes("EXTRACTING") ||
+        text.includes("UPLOADING")
+    ){
+        div.classList.add("warning");
+    }
+
+    if(
+        text.includes("[OK]") ||
+        text.includes("COMPLETE") ||
+        text.includes("100%")
+    ){
+        div.classList.add("success");
+    }
+
+    div.textContent = "> " + text;
+    terminal.appendChild(div);
+
+    while(terminal.scrollHeight > terminal.clientHeight){
+        terminal.removeChild(terminal.firstChild);
+    }
+}
+
+function runTerminal(){
+
+    if(index < lines.length){
+
+        addLine(lines[index]);
+        index++;
+
+        const delay =
+            Math.random() * 100 + 45;
+
+        setTimeout(runTerminal, delay);
+
+    }else{
+
+        setTimeout(()=>{
+            finalScreen.classList.add("show");
+        },700);
+
+    }
+}
+
+/* يبدأ التسلسل */
+setTimeout(runTerminal,500);
+
+</script>
+
+</body>
+</html>
